@@ -70,10 +70,10 @@ impl Interpreter {
         let opcode = (high_byte as u16) << 8 | (low_byte as u16);
 
         match(
-            (high_byte >> 4) & 0xF,
-            high_byte & 0xF,
-            (low_byte >> 4) & 0xF,
-            low_byte & 0xF,
+            (opcode & 0xF000) >> 12,
+            (opcode & 0x0F00) >> 8,
+            (opcode & 0x00F0) >> 4,
+            opcode & 0x000F
         ) {
             (0x0, 0x0, 0xE, 0x0) => {
                 self.memory[0xF00..0xF00 + Self::DISPLAY_SIZE].fill(0x00);
