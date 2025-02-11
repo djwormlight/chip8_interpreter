@@ -69,26 +69,25 @@ impl Interpreter {
 
         let opcode = (high_byte as u16) << 8 | (low_byte as u16);
 
-        match opcode & 0xF000 {
-            0x0000 => match low_byte {
-                0xE0 => {
-                    self.memory[0xF00..0xF00 + Self::DISPLAY_SIZE].fill(0x00);
+        match(
+            (high_byte >> 4) & 0xF,
+            high_byte & 0xF,
+            (low_byte >> 4) & 0xF,
+            low_byte & 0xF,
+        ) {
+            (0x0, 0x0, 0xE, 0x0) => {
+                self.memory[0xF00..0xF00 + Self::DISPLAY_SIZE].fill(0x00);
 
-                    self.step_to_next_instruction();
-                }
+                self.step_to_next_instruction();
+            }
 
-                _ => {
-                    panic!("Unsupported 0x0000 bit! {:02X}", low_byte)
-                }
-            },
-
-            0x1000 => {
+            (0x1, _, _, _) => {
                 let new_address = opcode & 0x0FFF;
 
                 self.program_counter = new_address;
             }
 
-            0x3000 => {
+            (0x3, _, _, _) => {
                 let register_index = ((opcode & 0x0F00) >> 8) as usize;
                 let comparison_value = (opcode & 0x00FF) as u8;
 
@@ -99,7 +98,7 @@ impl Interpreter {
                 }
             }
 
-            0x4000 => {
+            (0x4, _, _, _) => {
                 let register_index = ((opcode & 0x0F00) >> 8) as usize;
                 let comparison_value = (opcode & 0x00FF) as u8;
 
@@ -110,7 +109,7 @@ impl Interpreter {
                 }
             }
 
-            0x5000 => {
+            (0x5, _, _, _) => {
                 let register_index_x = ((opcode & 0x0F00) >> 8) as usize;
                 let register_index_y = ((opcode & 0x00F0) >> 4) as usize;
 
@@ -121,7 +120,7 @@ impl Interpreter {
                 }
             }
 
-            0x6000 => {
+            (0x6, _, _, _) => {
                 let register_index = ((opcode & 0x0F00) >> 8) as usize;
                 let register_value = (opcode & 0x00FF) as u8;
 
@@ -130,7 +129,7 @@ impl Interpreter {
                 self.step_to_next_instruction();
             }
 
-            0x7000 => {
+            (0x7, _, _, _) => {
                 let register_index = ((opcode & 0x0F00) >> 8) as usize;
                 let register_value = (opcode & 0x00FF) as u8;
 
@@ -139,7 +138,7 @@ impl Interpreter {
                 self.step_to_next_instruction();
             }
 
-            0x8000 => {
+            (0x8, _, _, _) => {
                 let register_index_x = ((opcode & 0x0F00) >> 8) as usize;
                 let register_index_y = ((opcode & 0x00F0) >> 4) as usize;
 
@@ -168,7 +167,7 @@ impl Interpreter {
                 self.step_to_next_instruction();
             }
 
-            0xA000 => {
+            (0xA, _, _, _) => {
                 let address = opcode & 0x0FFF;
 
                 self.index_register = address;
@@ -176,7 +175,7 @@ impl Interpreter {
                 self.step_to_next_instruction();
             }
 
-            0xD000 => {
+            (0xD, _, _, _) => {
                 let i = self.index_register as usize;
 
                 let register_index_x = ((opcode & 0x0F00) >> 8) as usize;
